@@ -1,14 +1,16 @@
 import {
   Body,
-  Controller,
-  Logger,
+  Controller, Delete, Get,
+  Logger, Param, ParseIntPipe, Patch,
   Post,
   UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+  ValidationPipe
+} from "@nestjs/common";
 import { CreateListDto } from './dto/create-list.dto';
 import { List } from './list.entity';
 import { ListsService } from './lists.service';
+import { ListStatusValidationPipe } from "./pipes/list-status-validation.pipe";
+import { ListStatus } from "./list-status.enum";
 
 @Controller('lists')
 export class ListsController {
@@ -24,8 +26,26 @@ export class ListsController {
     return this.listsService.createList(createListDto);
   }
   // to do list 가져오기
+  @Get()
+  getAllLists(): Promise<List[]> {
+    this.logger.verbose('trying to get all boards');
+    return this.listsService.getAllLists();
+  }
 
   // to do list 수정하기
+  @Patch(':id/status')
+  updateListStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('status', ListStatusValidationPipe) status: ListStatus,
+  ): Promise<List> {
+    return this.listsService.updateListStatus(id, status);
+  }
 
   // to do list 삭제하기
+  @Delete(':id')
+  deleteListStatus(
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<void> {
+    return this.listsService.deleteList(id);
+  }
 }
