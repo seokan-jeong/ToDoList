@@ -5,3 +5,7 @@ db:
   type: 'mysql'
   port: '3306'
   database: 'to-do-list'
+
+jwt:
+  secret: 'Secret1234'
+  expiresIn: 3600

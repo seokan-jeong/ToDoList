@@ -3,8 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ListsModule } from './lists/lists.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmConfig } from './configs/typeorm.config';
 import { List } from './lists/list.entity';
+import { User } from './auth/user.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -14,10 +15,11 @@ import { List } from './lists/list.entity';
       username: 'root',
       password: '@ddubu0411',
       database: 'to_do_list',
-      entities: [List],
+      entities: [List, User],
       synchronize: true,
     }),
     ListsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

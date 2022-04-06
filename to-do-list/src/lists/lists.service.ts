@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { List } from './list.entity';
 import { CreateListDto } from './dto/create-list.dto';
 import { ListStatus } from './list-status.enum';
 import { DeleteListDto } from './dto/delete-list.dto';
+import { User } from '../auth/user.entity';
 
 @Injectable()
 export class ListsService {
@@ -14,12 +15,13 @@ export class ListsService {
   ) {}
 
   // to do list 만들기
-  async createList(createListDto: CreateListDto): Promise<List> {
+  async createList(createListDto: CreateListDto, user: User): Promise<List> {
     const { contents } = createListDto;
 
     const list = this.listRepository.create({
       contents: contents,
       status: ListStatus.NOT_CHECKED,
+      user: user,
     });
 
     await this.listRepository.save(list);
@@ -27,8 +29,9 @@ export class ListsService {
   }
 
   // to do list 가져오기
-  async getAllLists(): Promise<List[]> {
+  async getAllLists(user: User): Promise<List[]> {
     const query = this.listRepository.createQueryBuilder('list');
+    query.where('list.userId = :userId', { userId: user.id });
     const lists = await query.getMany();
     return lists;
   }
@@ -58,9 +61,21 @@ export class ListsService {
   }
 
   // to do list 삭제하기
-  async deleteList(deleteListDto: DeleteListDto): Promise<void> {
+  async deleteList(deleteListDto: DeleteListDto, user: User): Promise<void> {
     const ids = deleteListDto.id;
 
-    await this.listRepository.delete(ids);
+    const result = await this.listRepository
+      .createQueryBuilder()
+      .delete()
+      .from(List)
+      .where('id In (:ids)', { ids: ids })
+      .andWhere('userId = :userId', { userId: user.id })
+      .execute();
+
+    if (result.affected === 0) {
+      throw new NotFoundException("Can't find board with id " + ids);
+    }
+
+    console.log('result', result);
   }
 }
