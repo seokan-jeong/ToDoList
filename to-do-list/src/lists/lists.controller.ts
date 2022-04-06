@@ -1,16 +1,22 @@
 import {
   Body,
-  Controller, Delete, Get,
-  Logger, Param, ParseIntPipe, Patch,
-  Post,
+  Controller,
+  Delete,
+  Get,
+  Logger,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post, Put,
   UsePipes,
   ValidationPipe
 } from "@nestjs/common";
 import { CreateListDto } from './dto/create-list.dto';
 import { List } from './list.entity';
 import { ListsService } from './lists.service';
-import { ListStatusValidationPipe } from "./pipes/list-status-validation.pipe";
-import { ListStatus } from "./list-status.enum";
+import { ListStatusValidationPipe } from './pipes/list-status-validation.pipe';
+import { ListStatus } from './list-status.enum';
+import { DeleteListDto } from "./dto/delete-list.dto";
 
 @Controller('lists')
 export class ListsController {
@@ -33,7 +39,7 @@ export class ListsController {
   }
 
   // to do list 수정하기
-  @Patch(':id/status')
+  @Put(':id/status')
   updateListStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body('status', ListStatusValidationPipe) status: ListStatus,
@@ -42,10 +48,11 @@ export class ListsController {
   }
 
   // to do list 삭제하기
-  @Delete(':id')
-  deleteListStatus(
-    @Param('id', ParseIntPipe) id: number
-  ): Promise<void> {
-    return this.listsService.deleteList(id);
+  @Delete()
+  deleteList(@Body() deleteListDto: DeleteListDto): Promise<void> {
+    this.logger.verbose(
+      'deleting list.' + 'Payload: ' + JSON.stringify(deleteListDto),
+    );
+    return this.listsService.deleteList(deleteListDto);
   }
 }

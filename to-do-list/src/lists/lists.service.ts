@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { List } from './list.entity';
 import { CreateListDto } from './dto/create-list.dto';
 import { ListStatus } from './list-status.enum';
+import { DeleteListDto } from './dto/delete-list.dto';
 
 @Injectable()
 export class ListsService {
@@ -57,18 +58,9 @@ export class ListsService {
   }
 
   // to do list 삭제하기
-  async deleteList(id: number): Promise<void> {
-    const result = await this.listRepository
-      .createQueryBuilder()
-      .delete()
-      .from(List)
-      .where('id = :id', { id: id })
-      .execute();
+  async deleteList(deleteListDto: DeleteListDto): Promise<void> {
+    const ids = deleteListDto.id;
 
-    if (result.affected == 0) {
-      throw new NotFoundException("Can't find list with id " + id);
-    }
-
-    console.log('result', result);
+    await this.listRepository.delete(ids);
   }
 }
